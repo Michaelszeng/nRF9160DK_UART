@@ -90,7 +90,6 @@ int main(void)
 
 	int ret;
 
-	// UART
 	if (!device_is_ready(uart)) {
 		printk("uart not ready. returning.\n");
 		return -1;
