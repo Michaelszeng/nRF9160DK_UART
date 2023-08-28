@@ -10,10 +10,10 @@
 
 #define SLEEP_TIME_MS   1000
 
-// #define UART uart1  // uart1: TX = P0.01, RX = P0.00.    TO BE USED FOR UART DEBUGGING
-#define UART uart2  // uart2: TX = P0.16, RX = P0.15.    TO BE USED FOR UART COMMS WITH nRF9160
+#define UART uart1  // uart1: TX = P0.01, RX = P0.00.    TO BE USED FOR UART DEBUGGING
+// #define UART uart2  // uart2: TX = P0.16, RX = P0.15.    TO BE USED FOR UART COMMS WITH nRF9160
 
-const struct device *uart = DEVICE_DT_GET(DT_NODELABEL(UART));
+const struct device *uart_dev = DEVICE_DT_GET(DT_NODELABEL(UART));
 
 #define BUFF_SIZE 10  // IMPORTANT: RX and TX buffers must be the same size. This is bc UART_RX_RDY event only occurs when RX buffer is full.
 static uint8_t* rx_buf;  // A buffer to store incoming UART data
@@ -59,7 +59,7 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
 		// printk("UART_RX_BUF_REQUEST\n");
 		rx_buf = k_malloc(BUFF_SIZE * sizeof(uint8_t));
 		if (rx_buf) {
-			uart_rx_buf_rsp(uart, rx_buf, BUFF_SIZE);
+			uart_rx_buf_rsp(uart_dev, rx_buf, BUFF_SIZE);
 		} else {
 			printk("WARNING: Not able to allocate UART receive buffer");
 		}
@@ -72,7 +72,7 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
 		
 	case UART_RX_DISABLED:
 		printk("UART_RX_DISABLED\n");
-		uart_rx_enable(uart, rx_buf, BUFF_SIZE, SYS_FOREVER_US);
+		uart_rx_enable(uart_dev, rx_buf, BUFF_SIZE, SYS_FOREVER_US);
 		break;
 
 	case UART_RX_STOPPED:
@@ -92,18 +92,18 @@ int main(void)
 
 	int ret;
 
-	if (!device_is_ready(uart)) {
+	if (!device_is_ready(uart_dev)) {
 		printk("uart not ready. returning.\n");
 		return -1;
 	}
 
-	ret = uart_callback_set(uart, uart_cb, NULL);
+	ret = uart_callback_set(uart_dev, uart_cb, NULL);
 	if (ret) {
 		return ret;
 	}
 
 	k_msleep(1000);
-	ret = uart_rx_enable(uart, rx_buf, BUFF_SIZE, SYS_FOREVER_US);
+	ret = uart_rx_enable(uart_dev, rx_buf, BUFF_SIZE, SYS_FOREVER_US);
 	if (ret) {
 		printk("uart_rx_enable faild with ret=%d\n", ret);
 		return ret;
@@ -117,7 +117,7 @@ int main(void)
 		printk("Looping... %d\n", ctr);
 		ctr++;
 
-		ret = uart_tx(uart, tx_buf, BUFF_SIZE, SYS_FOREVER_US);
+		ret = uart_tx(uart_dev, tx_buf, BUFF_SIZE, SYS_FOREVER_US);
 		if (ret) {
 			printk("uart_tx errored: %d.\n", ret);
 		}
