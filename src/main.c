@@ -21,6 +21,7 @@ static uint8_t* rx_buf;  // A buffer to store incoming UART data
 #define MAGIC_NUMBER 77  // Used to confirm that incoming data is valid
 
 
+
 static void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
 {
 
