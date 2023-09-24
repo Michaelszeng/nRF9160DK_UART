@@ -15,10 +15,10 @@
 
 const struct device *uart_dev = DEVICE_DT_GET(DT_NODELABEL(UART));
 
-#define BUFF_SIZE 10  // IMPORTANT: RX and TX buffers must be the same size. This is bc UART_RX_RDY event only occurs when RX buffer is full.
+#define BUFF_SIZE 99  // IMPORTANT: RX and TX buffers must be the same size. This is bc UART_RX_RDY event only occurs when RX buffer is full.
 static uint8_t* rx_buf;  // A buffer to store incoming UART data
 
-#define MAGIC_NUMBER 0xFF  // Used to confirm that incoming data is valid
+#define MAGIC_NUMBER 77  // Used to confirm that incoming data is valid
 
 
 static void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
@@ -109,7 +109,10 @@ int main(void)
 		return ret;
 	}
 
-	static char tx_buf[BUFF_SIZE] = {MAGIC_NUMBER, 0xFF, 0xFF, 0xFF, 0xFF, '1', '2', '3', '4', '5'};
+	static char tx_buf[100];
+	for (int i=0; i<100; i++) {
+		tx_buf[i] = 17;
+	}
 
 	int ctr = 0;
 	while (1) {
